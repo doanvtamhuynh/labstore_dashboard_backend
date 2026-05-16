@@ -24,3 +24,21 @@
   - JWT Bearer auth, refresh-token rotation, BCrypt password hashing, TOTP 2FA, role policies, audit log writes are in place.
   - Swagger UI available at /swagger and OpenAPI JSON at /swagger/v1/swagger.json.
   - First login seeds a SuperAdmin from SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD when admin_users is empty.
+
+## Dashboard & Analytics
+- Endpoints:
+  - GET /api/dashboard/summary
+  - GET /api/dashboard/revenue-chart?period=day|week|month|year
+  - GET /api/dashboard/top-products?limit=10
+  - GET /api/dashboard/geo-orders
+  - GET /api/dashboard/kpi
+- Main files:
+  - src/Controllers/DashboardController.cs
+  - src/Services/DashboardService.cs
+  - src/Repositories/DashboardRepository.cs
+  - src/DTOs/DashboardDtos.cs
+- Notes:
+  - Dashboard routes require JWT authentication.
+  - Reads generic MongoDB documents from orders, products, and customers collections.
+  - Revenue chart groups orders by createdAtUtc; low stock count uses products.stock <= 10.
+  - KPI returns conversionRate and averageOrderValue.
