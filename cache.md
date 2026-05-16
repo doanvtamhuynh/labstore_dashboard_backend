@@ -126,3 +126,23 @@
   - Detail response includes the latest 50 orders for purchase history.
   - CRM notes store content, creator identity, and timestamp.
   - Loyalty endpoint sets the current loyalty point balance.
+
+## Promotions & Marketing
+- Endpoints:
+  - CRUD /api/promotions/coupons
+  - CRUD /api/promotions/flash-sales
+  - CRUD /api/promotions/banners
+  - CRUD /api/promotions/affiliate
+  - POST /api/promotions/email-campaigns
+- Main files:
+  - src/Controllers/PromotionsController.cs
+  - src/Services/PromotionService.cs
+  - src/Repositories/MongoCrudRepository.cs
+  - src/Models/PromotionModels.cs
+  - src/DTOs/PromotionDtos.cs
+- Notes:
+  - Coupons support percentage/fixed discount, usage limits, status, and schedule fields.
+  - Flash sales support category targeting, discount percent, status, and schedule.
+  - Banners support image URL, link URL, position, status, and schedule.
+  - Affiliate programs support partner name, tracking code, commission percent, and status.
+  - Email campaign endpoint returns a queued placeholder response; email provider is not wired yet.
