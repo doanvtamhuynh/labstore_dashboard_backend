@@ -211,3 +211,5 @@ FakesAssemblies/
 
 cache.md
 prompt.md
+.env
+AGENTS.md
