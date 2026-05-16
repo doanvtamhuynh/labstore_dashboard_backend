@@ -19,9 +19,53 @@ public sealed class ReportService : IReportService
     public Task<CustomerBehaviorReportResponse> GetCustomersAsync(CancellationToken cancellationToken) => _reports.GetCustomersAsync(cancellationToken);
     public Task<AffiliateReportResponse> GetAffiliateAsync(CancellationToken cancellationToken) => _reports.GetAffiliateAsync(cancellationToken);
 
-    public Task<byte[]> ExportAsync(string reportName, CancellationToken cancellationToken)
+    public async Task<byte[]> ExportAsync(string reportName, CancellationToken cancellationToken)
     {
-        var csv = $"report,generatedAtUtc{Environment.NewLine}{reportName},{DateTime.UtcNow:O}{Environment.NewLine}";
-        return Task.FromResult(Encoding.UTF8.GetBytes(csv));
+        var normalized = reportName.ToLowerInvariant();
+        var csv = normalized switch
+        {
+            "revenue" => ToCsv(await GetRevenueAsync(new DateRangeQuery(null, null), cancellationToken)),
+            "products" => ToCsv(await GetProductsAsync(cancellationToken)),
+            "inventory" => ToCsv(await GetInventoryAsync(cancellationToken)),
+            "customers" => ToCsv(await GetCustomersAsync(cancellationToken)),
+            "affiliate" => ToCsv(await GetAffiliateAsync(cancellationToken)),
+            _ => $"report,generatedAtUtc{Environment.NewLine}{reportName},{DateTime.UtcNow:O}{Environment.NewLine}"
+        };
+        return Encoding.UTF8.GetBytes(csv);
+    }
+
+    private static string ToCsv(RevenueReportResponse report)
+    {
+        return $"revenue,orders,fromDate,toDate{Environment.NewLine}{report.Revenue},{report.Orders},{report.FromDate:O},{report.ToDate:O}{Environment.NewLine}";
+    }
+
+    private static string ToCsv(IReadOnlyList<TopProductResponse> rows)
+    {
+        var builder = new StringBuilder("productId,name,quantitySold,revenue").AppendLine();
+        foreach (var row in rows)
+        {
+            builder.AppendLine($"{row.ProductId},{Escape(row.Name)},{row.QuantitySold},{row.Revenue}");
+        }
+        return builder.ToString();
+    }
+
+    private static string ToCsv(InventoryReportResponse report)
+    {
+        return $"lowStock,outOfStock{Environment.NewLine}{report.LowStock},{report.OutOfStock}{Environment.NewLine}";
+    }
+
+    private static string ToCsv(CustomerBehaviorReportResponse report)
+    {
+        return $"customers,orders,averageOrdersPerCustomer{Environment.NewLine}{report.Customers},{report.Orders},{report.AverageOrdersPerCustomer}{Environment.NewLine}";
+    }
+
+    private static string ToCsv(AffiliateReportResponse report)
+    {
+        return $"partners,estimatedCommission{Environment.NewLine}{report.Partners},{report.EstimatedCommission}{Environment.NewLine}";
+    }
+
+    private static string Escape(string value)
+    {
+        return value.Contains(',') ? $"\"{value.Replace("\"", "\"\"")}\"" : value;
     }
 }

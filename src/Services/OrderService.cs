@@ -58,14 +58,15 @@ public sealed class OrderService : IOrderService
     public async Task<byte[]> CreateInvoicePdfAsync(string id, CancellationToken cancellationToken)
     {
         var order = await GetOrderAsync(id, cancellationToken);
-        var content = new StringBuilder();
-        content.AppendLine("%PDF-1.4");
-        content.AppendLine("% Labstore invoice placeholder");
-        content.AppendLine($"Invoice: {order.Code}");
-        content.AppendLine($"Customer: {order.CustomerName} <{order.CustomerEmail}>");
-        content.AppendLine($"Total: {order.TotalAmount.ToString(CultureInfo.InvariantCulture)}");
-        content.AppendLine("%%EOF");
-        return Encoding.UTF8.GetBytes(content.ToString());
+        var lines = new[]
+        {
+            "Labstore Invoice",
+            $"Invoice: {order.Code}",
+            $"Customer: {order.CustomerName} <{order.CustomerEmail}>",
+            $"Status: {order.Status}",
+            $"Total: {order.TotalAmount.ToString(CultureInfo.InvariantCulture)}"
+        };
+        return BuildSimplePdf(lines);
     }
 
     public async Task<string> ExportCsvAsync(OrderQuery query, CancellationToken cancellationToken)
@@ -146,5 +147,42 @@ public sealed class OrderService : IOrderService
         }
 
         return value.Contains(',') ? $"\"{value.Replace("\"", "\"\"")}\"" : value;
+    }
+
+    private static byte[] BuildSimplePdf(IReadOnlyList<string> lines)
+    {
+        var stream = string.Join(Environment.NewLine, lines.Select((line, index) => $"BT /F1 12 Tf 72 {760 - (index * 20)} Td ({EscapePdf(line)}) Tj ET"));
+        var objects = new[]
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            $"<< /Length {Encoding.ASCII.GetByteCount(stream)} >>\nstream\n{stream}\nendstream"
+        };
+
+        var builder = new StringBuilder("%PDF-1.4\n");
+        var offsets = new List<int> { 0 };
+        foreach (var (body, index) in objects.Select((body, index) => (body, index)))
+        {
+            offsets.Add(Encoding.ASCII.GetByteCount(builder.ToString()));
+            builder.Append(index + 1).Append(" 0 obj\n").Append(body).Append("\nendobj\n");
+        }
+
+        var xrefOffset = Encoding.ASCII.GetByteCount(builder.ToString());
+        builder.Append("xref\n0 ").Append(objects.Length + 1).Append('\n');
+        builder.Append("0000000000 65535 f \n");
+        foreach (var offset in offsets.Skip(1))
+        {
+            builder.Append(offset.ToString("D10", CultureInfo.InvariantCulture)).Append(" 00000 n \n");
+        }
+
+        builder.Append("trailer\n<< /Size ").Append(objects.Length + 1).Append(" /Root 1 0 R >>\nstartxref\n").Append(xrefOffset).Append("\n%%EOF");
+        return Encoding.ASCII.GetBytes(builder.ToString());
+    }
+
+    private static string EscapePdf(string value)
+    {
+        return value.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
     }
 }

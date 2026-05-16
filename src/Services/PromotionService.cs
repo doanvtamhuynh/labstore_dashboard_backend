@@ -1,8 +1,6 @@
 using backend.src.DTOs;
 using backend.src.Models;
 using backend.src.Repositories;
-using MongoDB.Bson;
-
 namespace backend.src.Services;
 
 public sealed class PromotionService : IPromotionService
@@ -11,17 +9,20 @@ public sealed class PromotionService : IPromotionService
     private readonly ICrudRepository<FlashSale> _flashSales;
     private readonly ICrudRepository<PromoBanner> _banners;
     private readonly ICrudRepository<AffiliateProgram> _affiliates;
+    private readonly ICrudRepository<EmailCampaign> _emailCampaigns;
 
     public PromotionService(
         ICrudRepository<Coupon> coupons,
         ICrudRepository<FlashSale> flashSales,
         ICrudRepository<PromoBanner> banners,
-        ICrudRepository<AffiliateProgram> affiliates)
+        ICrudRepository<AffiliateProgram> affiliates,
+        ICrudRepository<EmailCampaign> emailCampaigns)
     {
         _coupons = coupons;
         _flashSales = flashSales;
         _banners = banners;
         _affiliates = affiliates;
+        _emailCampaigns = emailCampaigns;
     }
 
     public async Task<IReadOnlyList<CouponResponse>> ListCouponsAsync(CancellationToken cancellationToken)
@@ -136,10 +137,23 @@ public sealed class PromotionService : IPromotionService
 
     public Task DeleteAffiliateAsync(string id, CancellationToken cancellationToken) => _affiliates.DeleteAsync(id, cancellationToken);
 
-    public Task<EmailCampaignResponse> CreateEmailCampaignAsync(EmailCampaignRequest request, CancellationToken cancellationToken)
+    public async Task<EmailCampaignResponse> CreateEmailCampaignAsync(EmailCampaignRequest request, CancellationToken cancellationToken)
     {
-        var response = new EmailCampaignResponse(ObjectId.GenerateNewId().ToString(), request.Subject, request.Segment, request.ScheduledAtUtc, PromotionStatus.Draft);
-        return Task.FromResult(response);
+        if (string.IsNullOrWhiteSpace(request.Subject) || string.IsNullOrWhiteSpace(request.Body) || string.IsNullOrWhiteSpace(request.Segment))
+        {
+            throw new InvalidOperationException("Email campaign subject, body, and segment are required");
+        }
+
+        var item = new EmailCampaign
+        {
+            Subject = request.Subject.Trim(),
+            Body = request.Body,
+            Segment = request.Segment.Trim(),
+            ScheduledAtUtc = request.ScheduledAtUtc,
+            Status = PromotionStatus.Draft
+        };
+        await _emailCampaigns.CreateAsync(item, cancellationToken);
+        return new EmailCampaignResponse(item.Id!, item.Subject, item.Segment, item.ScheduledAtUtc, item.Status);
     }
 
     private static async Task<T> RequireAsync<T>(ICrudRepository<T> repository, string id, CancellationToken cancellationToken) where T : class

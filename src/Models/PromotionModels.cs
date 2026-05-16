@@ -81,3 +81,17 @@ public sealed class AffiliateProgram
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+
+public sealed class EmailCampaign
+{
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
+
+    public string Subject { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public string Segment { get; set; } = string.Empty;
+    public DateTime? ScheduledAtUtc { get; set; }
+    public PromotionStatus Status { get; set; } = PromotionStatus.Draft;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}

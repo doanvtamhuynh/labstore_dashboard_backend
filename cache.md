@@ -103,7 +103,7 @@
 - Notes:
   - Order list supports status, date range, customer/code search, and pagination.
   - Status updates append an OrderHistoryEntry with the current admin identity.
-  - Invoice endpoint returns an application/pdf placeholder payload for now.
+  - Invoice endpoint returns a simple valid application/pdf payload.
   - Export returns text/csv.
 
 ## Customers
@@ -145,7 +145,7 @@
   - Flash sales support category targeting, discount percent, status, and schedule.
   - Banners support image URL, link URL, position, status, and schedule.
   - Affiliate programs support partner name, tracking code, commission percent, and status.
-  - Email campaign endpoint returns a queued placeholder response; email provider is not wired yet.
+  - Email campaign endpoint stores draft campaign data in MongoDB; email provider send integration is not wired yet.
 
 ## Payments
 - Endpoints:
@@ -250,7 +250,7 @@
   - src/DTOs/ReportDtos.cs
 - Notes:
   - Revenue supports optional FromDate/ToDate query.
-  - Export returns CSV placeholder with report name and generated timestamp.
+  - Export returns CSV data for revenue, products, inventory, customers, and affiliate reports.
 
 ## SEO & Content
 - Endpoints:
