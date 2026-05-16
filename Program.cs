@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using backend.src.Config;
 using backend.src.Helpers;
+using backend.src.Hubs;
 using backend.src.Middlewares;
 using backend.src.Models;
 using backend.src.Repositories;
@@ -65,6 +66,8 @@ builder.Services.AddScoped<ICrudRepository<ShippingConfig>>(sp => new MongoCrudR
 builder.Services.AddScoped<ICrudRepository<ShippingProvider>>(sp => new MongoCrudRepository<ShippingProvider>(sp.GetRequiredService<IMongoDatabase>(), "shipping_providers"));
 builder.Services.AddScoped<ICrudRepository<Warehouse>>(sp => new MongoCrudRepository<Warehouse>(sp.GetRequiredService<IMongoDatabase>(), "shipping_warehouses"));
 builder.Services.AddScoped<ICrudRepository<ShippingReturn>>(sp => new MongoCrudRepository<ShippingReturn>(sp.GetRequiredService<IMongoDatabase>(), "shipping_returns"));
+builder.Services.AddScoped<ICrudRepository<SupportTicket>>(sp => new MongoCrudRepository<SupportTicket>(sp.GetRequiredService<IMongoDatabase>(), "support_tickets"));
+builder.Services.AddScoped<ICrudRepository<FaqItem>>(sp => new MongoCrudRepository<FaqItem>(sp.GetRequiredService<IMongoDatabase>(), "support_faq"));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -75,8 +78,10 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IShippingService, ShippingService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<ISupportService, SupportService>();
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -141,5 +146,6 @@ app.UseCors("DashboardCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run("http://localhost:5000");

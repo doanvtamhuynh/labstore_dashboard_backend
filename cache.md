@@ -199,3 +199,21 @@
   - Status supports Pending, Approved, Hidden, Deleted.
   - Reply stores admin identity and reply timestamp.
   - Flagged endpoint returns all reviews marked IsFlagged.
+
+## Support
+- Endpoints:
+  - CRUD /api/support/tickets
+  - PATCH /api/support/tickets/{id}/assign
+  - PATCH /api/support/tickets/{id}/status
+  - SignalR Hub /hubs/chat
+  - CRUD /api/support/faq
+- Main files:
+  - src/Controllers/SupportController.cs
+  - src/Services/SupportService.cs
+  - src/Hubs/ChatHub.cs
+  - src/Models/SupportModels.cs
+  - src/DTOs/SupportDtos.cs
+- Notes:
+  - Tickets support status, priority, assignment, and initial customer message.
+  - FAQ supports category, publish flag, and sort order.
+  - ChatHub supports joining a ticket group and broadcasting ticket messages.
