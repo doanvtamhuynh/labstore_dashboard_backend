@@ -68,6 +68,7 @@ builder.Services.AddScoped<ICrudRepository<Warehouse>>(sp => new MongoCrudReposi
 builder.Services.AddScoped<ICrudRepository<ShippingReturn>>(sp => new MongoCrudRepository<ShippingReturn>(sp.GetRequiredService<IMongoDatabase>(), "shipping_returns"));
 builder.Services.AddScoped<ICrudRepository<SupportTicket>>(sp => new MongoCrudRepository<SupportTicket>(sp.GetRequiredService<IMongoDatabase>(), "support_tickets"));
 builder.Services.AddScoped<ICrudRepository<FaqItem>>(sp => new MongoCrudRepository<FaqItem>(sp.GetRequiredService<IMongoDatabase>(), "support_faq"));
+builder.Services.AddScoped<ICrudRepository<Notification>>(sp => new MongoCrudRepository<Notification>(sp.GetRequiredService<IMongoDatabase>(), "notifications"));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -79,6 +80,7 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IShippingService, ShippingService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ISupportService, SupportService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
@@ -147,5 +149,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<NotificationsHub>("/hubs/notifications");
 
 app.Run("http://localhost:5000");

@@ -217,3 +217,20 @@
   - Tickets support status, priority, assignment, and initial customer message.
   - FAQ supports category, publish flag, and sort order.
   - ChatHub supports joining a ticket group and broadcasting ticket messages.
+
+## Notifications
+- Endpoints:
+  - SignalR Hub /hubs/notifications
+  - GET /api/notifications
+  - PATCH /api/notifications/{id}/read
+  - POST /api/notifications/push
+- Main files:
+  - src/Controllers/NotificationsController.cs
+  - src/Services/NotificationService.cs
+  - src/Hubs/NotificationsHub.cs
+  - src/Models/Notification.cs
+  - src/DTOs/NotificationDtos.cs
+- Notes:
+  - Notifications support Admin/Customer audience and optional recipient id.
+  - Push endpoint stores notification and broadcasts notificationReceived via SignalR.
+  - Email trigger automation is not wired yet.
