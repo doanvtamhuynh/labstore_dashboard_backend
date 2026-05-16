@@ -163,3 +163,21 @@
   - Payment list supports method/status/date filters and pagination.
   - Refund validates remaining refundable amount and marks fully refunded transactions.
   - Reconciliation returns gross revenue, refunded amount, net revenue, and transaction count.
+
+## Shipping
+- Endpoints:
+  - CRUD /api/shipping/configs
+  - GET /api/shipping/providers
+  - GET /api/shipping/tracking/{orderId}
+  - CRUD /api/shipping/warehouses
+  - CRUD /api/shipping/returns
+- Main files:
+  - src/Controllers/ShippingController.cs
+  - src/Services/ShippingService.cs
+  - src/Models/ShippingModels.cs
+  - src/DTOs/ShippingDtos.cs
+- Notes:
+  - Shipping configs support region, weight range, fee, and active status.
+  - Providers read from shipping_providers and fall back to default GHN/GHTK/Viettel Post entries when empty.
+  - Tracking currently reflects order status by orderId.
+  - Warehouses and shipping returns use Mongo CRUD repository.

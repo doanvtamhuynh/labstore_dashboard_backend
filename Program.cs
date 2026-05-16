@@ -60,6 +60,10 @@ builder.Services.AddScoped<ICrudRepository<Coupon>>(sp => new MongoCrudRepositor
 builder.Services.AddScoped<ICrudRepository<FlashSale>>(sp => new MongoCrudRepository<FlashSale>(sp.GetRequiredService<IMongoDatabase>(), "promotion_flash_sales"));
 builder.Services.AddScoped<ICrudRepository<PromoBanner>>(sp => new MongoCrudRepository<PromoBanner>(sp.GetRequiredService<IMongoDatabase>(), "promotion_banners"));
 builder.Services.AddScoped<ICrudRepository<AffiliateProgram>>(sp => new MongoCrudRepository<AffiliateProgram>(sp.GetRequiredService<IMongoDatabase>(), "promotion_affiliates"));
+builder.Services.AddScoped<ICrudRepository<ShippingConfig>>(sp => new MongoCrudRepository<ShippingConfig>(sp.GetRequiredService<IMongoDatabase>(), "shipping_configs"));
+builder.Services.AddScoped<ICrudRepository<ShippingProvider>>(sp => new MongoCrudRepository<ShippingProvider>(sp.GetRequiredService<IMongoDatabase>(), "shipping_providers"));
+builder.Services.AddScoped<ICrudRepository<Warehouse>>(sp => new MongoCrudRepository<Warehouse>(sp.GetRequiredService<IMongoDatabase>(), "shipping_warehouses"));
+builder.Services.AddScoped<ICrudRepository<ShippingReturn>>(sp => new MongoCrudRepository<ShippingReturn>(sp.GetRequiredService<IMongoDatabase>(), "shipping_returns"));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -68,6 +72,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IShippingService, ShippingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
