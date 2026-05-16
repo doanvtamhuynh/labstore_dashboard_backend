@@ -67,3 +67,21 @@
   - Import expects CSV columns: name, sku, price, stock, categoryId.
   - Export returns text/csv.
   - Cloudinary upload is not wired yet; image endpoint stores URL metadata for now.
+
+## Categories
+- Endpoints:
+  - GET /api/categories
+  - POST /api/categories
+  - PUT /api/categories/{id}
+  - DELETE /api/categories/{id}
+  - PATCH /api/categories/reorder
+- Main files:
+  - src/Controllers/CategoriesController.cs
+  - src/Services/CategoryService.cs
+  - src/Repositories/CategoryRepository.cs
+  - src/Models/Category.cs
+  - src/DTOs/CategoryDtos.cs
+- Notes:
+  - GET returns nested parent-child category tree.
+  - Delete blocks categories that still have child categories.
+  - Reorder updates SortOrder and ParentId in bulk.
