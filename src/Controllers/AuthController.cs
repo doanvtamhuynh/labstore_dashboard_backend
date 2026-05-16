@@ -63,32 +63,6 @@ public sealed class AuthController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null, "Password changed"));
     }
 
-    /// <summary>
-    /// Enable TOTP two-factor authentication for the current admin.
-    /// </summary>
-    [Authorize]
-    [HttpPost("enable-2fa")]
-    [ProducesResponseType(typeof(ApiResponse<EnableTwoFactorResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<EnableTwoFactorResponse>>> EnableTwoFactor(CancellationToken cancellationToken)
-    {
-        var result = await _authService.EnableTwoFactorAsync(GetUserId(), HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
-        return Ok(ApiResponse<EnableTwoFactorResponse>.Ok(result, "Two-factor authentication enabled"));
-    }
-
-    /// <summary>
-    /// Verify a TOTP two-factor code for the current admin.
-    /// </summary>
-    [Authorize]
-    [HttpPost("verify-2fa")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<object>>> VerifyTwoFactor(VerifyTwoFactorRequest request, CancellationToken cancellationToken)
-    {
-        var isValid = await _authService.VerifyTwoFactorAsync(GetUserId(), request, HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
-        return isValid
-            ? Ok(ApiResponse<object>.Ok(null, "Two-factor code verified"))
-            : BadRequest(ApiResponse<object>.Fail("Invalid two-factor code"));
-    }
-
     private string GetUserId()
     {
         return User.FindFirstValue(ClaimTypes.NameIdentifier)

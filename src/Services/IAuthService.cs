@@ -8,6 +8,4 @@ public interface IAuthService
     Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request, string? ipAddress, CancellationToken cancellationToken);
     Task LogoutAsync(LogoutRequest request, string? ipAddress, CancellationToken cancellationToken);
     Task ChangePasswordAsync(string adminUserId, ChangePasswordRequest request, string? ipAddress, CancellationToken cancellationToken);
-    Task<EnableTwoFactorResponse> EnableTwoFactorAsync(string adminUserId, string? ipAddress, CancellationToken cancellationToken);
-    Task<bool> VerifyTwoFactorAsync(string adminUserId, VerifyTwoFactorRequest request, string? ipAddress, CancellationToken cancellationToken);
 }

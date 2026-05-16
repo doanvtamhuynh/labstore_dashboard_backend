@@ -4,8 +4,6 @@
   - POST /api/auth/refresh-token
   - POST /api/auth/logout
   - POST /api/auth/change-password
-  - POST /api/auth/enable-2fa
-  - POST /api/auth/verify-2fa
 - Main files:
   - Program.cs
   - src/Controllers/AuthController.cs
@@ -21,7 +19,8 @@
 - Notes:
   - .NET 10 Web API scaffolded with Controller -> Service -> Repository pattern.
   - MongoDB config is loaded from .env, with empty keys documented in .env.example.
-  - JWT Bearer auth, refresh-token rotation, BCrypt password hashing, TOTP 2FA, role policies, audit log writes are in place.
+  - JWT Bearer auth, refresh-token rotation, BCrypt password hashing, role policies, audit log writes are in place.
+  - 2FA endpoints and login requirement were removed; login clears legacy 2FA flags for existing admin users.
   - Swagger UI available at /swagger and OpenAPI JSON at /swagger/v1/swagger.json.
   - First login seeds a SuperAdmin from SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD when admin_users is empty.
   - CORS allows localhost and 127.0.0.1 frontend dev origins on ports 5173 and 3000.

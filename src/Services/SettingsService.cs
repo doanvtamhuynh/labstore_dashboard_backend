@@ -59,5 +59,5 @@ public sealed class SettingsService : ISettingsService
     public Task DeleteAdminAsync(string id, CancellationToken cancellationToken) => _settings.DeleteAdminAsync(id, cancellationToken);
     public async Task<IReadOnlyList<AuditLogResponse>> ListAuditLogsAsync(CancellationToken cancellationToken) => (await _settings.ListAuditLogsAsync(cancellationToken)).Select(log => new AuditLogResponse(log.Id!, log.AdminUserId, log.Action, log.IpAddress, log.CreatedAtUtc)).ToList();
     public Task<BackupResponse> BackupAsync(CancellationToken cancellationToken) => Task.FromResult(new BackupResponse(ObjectId.GenerateNewId().ToString(), "labstore", DateTime.UtcNow, "queued"));
-    private static AdminUserResponse ToResponse(AdminUser admin) => new(admin.Id!, admin.Email, admin.FullName, admin.Role, admin.IsTwoFactorEnabled);
+    private static AdminUserResponse ToResponse(AdminUser admin) => new(admin.Id!, admin.Email, admin.FullName, admin.Role.ToString());
 }

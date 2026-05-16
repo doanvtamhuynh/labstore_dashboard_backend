@@ -8,7 +8,6 @@ using backend.src.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using OtpNet;
 
 namespace backend.src.Services;
 
@@ -41,12 +40,11 @@ public sealed class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid email or password");
         }
 
-        if (user.IsTwoFactorEnabled)
+        if (user.IsTwoFactorEnabled || !string.IsNullOrWhiteSpace(user.TwoFactorSecret))
         {
-            if (string.IsNullOrWhiteSpace(request.TwoFactorCode) || !ValidateTotp(user, request.TwoFactorCode))
-            {
-                throw new UnauthorizedAccessException("Invalid two-factor code");
-            }
+            user.IsTwoFactorEnabled = false;
+            user.TwoFactorSecret = null;
+            await _adminUsers.UpdateAsync(user, cancellationToken);
         }
 
         await WriteAuditAsync(user.Id, "auth.login", ipAddress, cancellationToken);
@@ -96,28 +94,6 @@ public sealed class AuthService : IAuthService
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         await _adminUsers.UpdateAsync(user, cancellationToken);
         await WriteAuditAsync(user.Id, "auth.change-password", ipAddress, cancellationToken);
-    }
-
-    public async Task<EnableTwoFactorResponse> EnableTwoFactorAsync(string adminUserId, string? ipAddress, CancellationToken cancellationToken)
-    {
-        var user = await GetActiveUserAsync(adminUserId, cancellationToken);
-        var secret = KeyGeneration.GenerateRandomKey(20);
-        var secretText = Base32Encoding.ToString(secret);
-
-        user.TwoFactorSecret = secretText;
-        user.IsTwoFactorEnabled = true;
-        await _adminUsers.UpdateAsync(user, cancellationToken);
-        await WriteAuditAsync(user.Id, "auth.enable-2fa", ipAddress, cancellationToken);
-
-        return new EnableTwoFactorResponse(secretText, secretText);
-    }
-
-    public async Task<bool> VerifyTwoFactorAsync(string adminUserId, VerifyTwoFactorRequest request, string? ipAddress, CancellationToken cancellationToken)
-    {
-        var user = await GetActiveUserAsync(adminUserId, cancellationToken);
-        var isValid = ValidateTotp(user, request.Code);
-        await WriteAuditAsync(user.Id, isValid ? "auth.verify-2fa.success" : "auth.verify-2fa.failed", ipAddress, cancellationToken);
-        return isValid;
     }
 
     private async Task<AdminUser> GetActiveUserAsync(string adminUserId, CancellationToken cancellationToken)
@@ -173,24 +149,13 @@ public sealed class AuthService : IAuthService
 
     private static AdminUserResponse ToResponse(AdminUser user)
     {
-        return new AdminUserResponse(user.Id!, user.Email, user.FullName, user.Role, user.IsTwoFactorEnabled);
+        return new AdminUserResponse(user.Id!, user.Email, user.FullName, user.Role.ToString());
     }
 
     private static string HashToken(string token)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
         return Convert.ToHexString(bytes);
-    }
-
-    private static bool ValidateTotp(AdminUser user, string code)
-    {
-        if (string.IsNullOrWhiteSpace(user.TwoFactorSecret))
-        {
-            return false;
-        }
-
-        var totp = new Totp(Base32Encoding.ToBytes(user.TwoFactorSecret));
-        return totp.VerifyTotp(code, out _, VerificationWindow.RfcSpecifiedNetworkDelay);
     }
 
     private async Task EnsureSeedAdminAsync(CancellationToken cancellationToken)
