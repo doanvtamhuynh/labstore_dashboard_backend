@@ -85,3 +85,23 @@
   - GET returns nested parent-child category tree.
   - Delete blocks categories that still have child categories.
   - Reorder updates SortOrder and ParentId in bulk.
+
+## Orders
+- Endpoints:
+  - GET /api/orders
+  - GET /api/orders/{id}
+  - PATCH /api/orders/{id}/status
+  - GET /api/orders/{id}/history
+  - GET /api/orders/{id}/invoice
+  - GET /api/orders/export
+- Main files:
+  - src/Controllers/OrdersController.cs
+  - src/Services/OrderService.cs
+  - src/Repositories/OrderRepository.cs
+  - src/Models/Order.cs
+  - src/DTOs/OrderDtos.cs
+- Notes:
+  - Order list supports status, date range, customer/code search, and pagination.
+  - Status updates append an OrderHistoryEntry with the current admin identity.
+  - Invoice endpoint returns an application/pdf placeholder payload for now.
+  - Export returns text/csv.
