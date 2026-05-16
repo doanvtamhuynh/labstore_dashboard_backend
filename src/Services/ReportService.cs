@@ -19,7 +19,7 @@ public sealed class ReportService : IReportService
     public Task<CustomerBehaviorReportResponse> GetCustomersAsync(CancellationToken cancellationToken) => _reports.GetCustomersAsync(cancellationToken);
     public Task<AffiliateReportResponse> GetAffiliateAsync(CancellationToken cancellationToken) => _reports.GetAffiliateAsync(cancellationToken);
 
-    public async Task<byte[]> ExportAsync(string reportName, CancellationToken cancellationToken)
+    public async Task<(byte[] Bytes, string ContentType, string FileName)> ExportAsync(string reportName, string? format, CancellationToken cancellationToken)
     {
         var normalized = reportName.ToLowerInvariant();
         var csv = normalized switch
@@ -31,7 +31,15 @@ public sealed class ReportService : IReportService
             "affiliate" => ToCsv(await GetAffiliateAsync(cancellationToken)),
             _ => $"report,generatedAtUtc{Environment.NewLine}{reportName},{DateTime.UtcNow:O}{Environment.NewLine}"
         };
-        return Encoding.UTF8.GetBytes(csv);
+
+        if (string.Equals(format, "pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            var lines = csv.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Take(35).ToList();
+            lines.Insert(0, $"Labstore {normalized} report");
+            return (BuildSimplePdf(lines), "application/pdf", $"{normalized}-report.pdf");
+        }
+
+        return (Encoding.UTF8.GetBytes(csv), "text/csv", $"{normalized}-report.csv");
     }
 
     private static string ToCsv(RevenueReportResponse report)
@@ -67,5 +75,39 @@ public sealed class ReportService : IReportService
     private static string Escape(string value)
     {
         return value.Contains(',') ? $"\"{value.Replace("\"", "\"\"")}\"" : value;
+    }
+
+    private static byte[] BuildSimplePdf(IReadOnlyList<string> lines)
+    {
+        var stream = string.Join(Environment.NewLine, lines.Select((line, index) => $"BT /F1 11 Tf 48 {760 - (index * 18)} Td ({EscapePdf(line)}) Tj ET"));
+        var objects = new[]
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            $"<< /Length {Encoding.ASCII.GetByteCount(stream)} >>\nstream\n{stream}\nendstream"
+        };
+        var builder = new StringBuilder("%PDF-1.4\n");
+        var offsets = new List<int> { 0 };
+        foreach (var (body, index) in objects.Select((body, index) => (body, index)))
+        {
+            offsets.Add(Encoding.ASCII.GetByteCount(builder.ToString()));
+            builder.Append(index + 1).Append(" 0 obj\n").Append(body).Append("\nendobj\n");
+        }
+        var xrefOffset = Encoding.ASCII.GetByteCount(builder.ToString());
+        builder.Append("xref\n0 ").Append(objects.Length + 1).Append('\n');
+        builder.Append("0000000000 65535 f \n");
+        foreach (var offset in offsets.Skip(1))
+        {
+            builder.Append(offset.ToString("D10", System.Globalization.CultureInfo.InvariantCulture)).Append(" 00000 n \n");
+        }
+        builder.Append("trailer\n<< /Size ").Append(objects.Length + 1).Append(" /Root 1 0 R >>\nstartxref\n").Append(xrefOffset).Append("\n%%EOF");
+        return Encoding.ASCII.GetBytes(builder.ToString());
+    }
+
+    private static string EscapePdf(string value)
+    {
+        return value.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
     }
 }

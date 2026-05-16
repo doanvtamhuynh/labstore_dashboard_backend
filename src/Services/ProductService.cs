@@ -10,10 +10,12 @@ namespace backend.src.Services;
 public sealed class ProductService : IProductService
 {
     private readonly IProductRepository _products;
+    private readonly IFileStorageService _fileStorage;
 
-    public ProductService(IProductRepository products)
+    public ProductService(IProductRepository products, IFileStorageService fileStorage)
     {
         _products = products;
+        _fileStorage = fileStorage;
     }
 
     public async Task<(IReadOnlyList<ProductResponse> Items, PaginationMetadata Pagination)> ListAsync(ProductQuery query, CancellationToken cancellationToken)
@@ -63,17 +65,21 @@ public sealed class ProductService : IProductService
         return ToResponse(product);
     }
 
-    public async Task<ProductResponse> AddImageAsync(string id, ProductImageRequest request, CancellationToken cancellationToken)
+    public async Task<ProductResponse> AddImageAsync(string id, ProductImageUploadRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Url))
+        var imageUrl = request.File is not null
+            ? await _fileStorage.UploadImageAsync(request.File, "labstore/products", cancellationToken)
+            : request.Url?.Trim();
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
         {
-            throw new InvalidOperationException("Image URL is required");
+            throw new InvalidOperationException("Image file or URL is required");
         }
 
         var product = await GetProductAsync(id, cancellationToken);
         product.Images.Add(new ProductImage
         {
-            Url = request.Url.Trim(),
+            Url = imageUrl,
             Alt = request.Alt,
             SortOrder = request.SortOrder
         });

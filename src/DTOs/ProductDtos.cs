@@ -21,6 +21,14 @@ public sealed record ProductVariantRequest(
 
 public sealed record ProductImageRequest(string Url, string? Alt, int SortOrder = 0);
 
+public sealed class ProductImageUploadRequest
+{
+    public IFormFile? File { get; init; }
+    public string? Url { get; init; }
+    public string? Alt { get; init; }
+    public int SortOrder { get; init; }
+}
+
 public sealed record SeoMetaRequest(string? Title, string? Description, string? Slug);
 
 public sealed record ProductRequest(

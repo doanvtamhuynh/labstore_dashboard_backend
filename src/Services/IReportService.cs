@@ -9,5 +9,5 @@ public interface IReportService
     Task<InventoryReportResponse> GetInventoryAsync(CancellationToken cancellationToken);
     Task<CustomerBehaviorReportResponse> GetCustomersAsync(CancellationToken cancellationToken);
     Task<AffiliateReportResponse> GetAffiliateAsync(CancellationToken cancellationToken);
-    Task<byte[]> ExportAsync(string reportName, CancellationToken cancellationToken);
+    Task<(byte[] Bytes, string ContentType, string FileName)> ExportAsync(string reportName, string? format, CancellationToken cancellationToken);
 }

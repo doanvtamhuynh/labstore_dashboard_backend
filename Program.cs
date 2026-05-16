@@ -32,6 +32,32 @@ var jwtOptions = new JwtOptions
     RefreshTokenDays = int.TryParse(Environment.GetEnvironmentVariable("JWT_REFRESH_TOKEN_DAYS"), out var days) ? days : 7
 };
 
+var cloudinaryOptions = new CloudinaryOptions
+{
+    CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME") ?? string.Empty,
+    ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY") ?? string.Empty,
+    ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET") ?? string.Empty,
+    UploadFolder = Environment.GetEnvironmentVariable("CLOUDINARY_UPLOAD_FOLDER") ?? "labstore/products",
+    LocalUploadRoot = Environment.GetEnvironmentVariable("LOCAL_UPLOAD_ROOT") ?? "wwwroot/uploads"
+};
+
+var smtpOptions = new SmtpOptions
+{
+    Host = Environment.GetEnvironmentVariable("SMTP_HOST") ?? string.Empty,
+    Port = int.TryParse(Environment.GetEnvironmentVariable("SMTP_PORT"), out var smtpPort) ? smtpPort : 587,
+    Username = Environment.GetEnvironmentVariable("SMTP_USERNAME") ?? string.Empty,
+    Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? string.Empty,
+    EnableSsl = !bool.TryParse(Environment.GetEnvironmentVariable("SMTP_ENABLE_SSL"), out var smtpSsl) || smtpSsl,
+    FromEmail = Environment.GetEnvironmentVariable("SMTP_FROM_EMAIL") ?? "no-reply@labstore.local",
+    FromName = Environment.GetEnvironmentVariable("SMTP_FROM_NAME") ?? "Labstore",
+    DefaultRecipients = Environment.GetEnvironmentVariable("SMTP_DEFAULT_RECIPIENTS") ?? string.Empty
+};
+
+var backupOptions = new BackupOptions
+{
+    Directory = Environment.GetEnvironmentVariable("BACKUP_DIRECTORY") ?? "backups"
+};
+
 if (string.IsNullOrWhiteSpace(mongoOptions.ConnectionString))
 {
     throw new InvalidOperationException("MONGODB_URI is required");
@@ -44,8 +70,12 @@ if (jwtOptions.Secret.Length < 32)
 
 builder.Services.AddSingleton(Options.Create(mongoOptions));
 builder.Services.AddSingleton(Options.Create(jwtOptions));
+builder.Services.AddSingleton(Options.Create(cloudinaryOptions));
+builder.Services.AddSingleton(Options.Create(smtpOptions));
+builder.Services.AddSingleton(Options.Create(backupOptions));
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoOptions.ConnectionString));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoOptions.DatabaseName));
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -77,6 +107,8 @@ builder.Services.AddScoped<ICrudRepository<BlogPost>>(sp => new MongoCrudReposit
 builder.Services.AddScoped<ICrudRepository<StaticPage>>(sp => new MongoCrudRepository<StaticPage>(sp.GetRequiredService<IMongoDatabase>(), "pages"));
 builder.Services.AddScoped<ICrudRepository<SeoRedirect>>(sp => new MongoCrudRepository<SeoRedirect>(sp.GetRequiredService<IMongoDatabase>(), "seo_redirects"));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -155,6 +187,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("DashboardCors");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

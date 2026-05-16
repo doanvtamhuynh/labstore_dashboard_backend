@@ -212,3 +212,5 @@ FakesAssemblies/
 prompt.md
 .env
 AGENTS.md
+backups/
+wwwroot/uploads/

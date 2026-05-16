@@ -86,11 +86,11 @@ public sealed class ProductsController : ControllerBase
     }
 
     /// <summary>
-    /// Add an image URL to a product.
+    /// Upload an image file or add an image URL to a product.
     /// </summary>
     [HttpPost("{id}/images")]
     [ProducesResponseType(typeof(ApiResponse<ProductResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<ProductResponse>>> AddImage(string id, ProductImageRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<ProductResponse>>> AddImage(string id, [FromForm] ProductImageUploadRequest request, CancellationToken cancellationToken)
     {
         var result = await _productService.AddImageAsync(id, request, cancellationToken);
         return Ok(ApiResponse<ProductResponse>.Ok(result, "Product image added"));

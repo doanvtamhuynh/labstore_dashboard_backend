@@ -20,4 +20,4 @@ public sealed record AffiliateProgramResponse(string Id, string PartnerName, str
 
 public sealed record EmailCampaignRequest(string Subject, string Body, string Segment, DateTime? ScheduledAtUtc);
 
-public sealed record EmailCampaignResponse(string Id, string Subject, string Segment, DateTime? ScheduledAtUtc, PromotionStatus Status);
+public sealed record EmailCampaignResponse(string Id, string Subject, string Segment, DateTime? ScheduledAtUtc, PromotionStatus Status, string DeliveryStatus, string? DeliveryError);

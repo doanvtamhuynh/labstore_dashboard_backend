@@ -34,8 +34,9 @@ public sealed class ReportsController : ControllerBase
     public async Task<ActionResult<ApiResponse<AffiliateReportResponse>>> Affiliate(CancellationToken cancellationToken) => Ok(ApiResponse<AffiliateReportResponse>.Ok(await _reportService.GetAffiliateAsync(cancellationToken)));
 
     [HttpGet("{reportName}/export")]
-    public async Task<FileResult> Export(string reportName, CancellationToken cancellationToken)
+    public async Task<FileResult> Export(string reportName, [FromQuery] string? format, CancellationToken cancellationToken)
     {
-        return File(await _reportService.ExportAsync(reportName, cancellationToken), "text/csv", $"{reportName}-report.csv");
+        var export = await _reportService.ExportAsync(reportName, format, cancellationToken);
+        return File(export.Bytes, export.ContentType, export.FileName);
     }
 }

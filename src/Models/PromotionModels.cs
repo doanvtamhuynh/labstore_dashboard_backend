@@ -93,5 +93,7 @@ public sealed class EmailCampaign
     public string Segment { get; set; } = string.Empty;
     public DateTime? ScheduledAtUtc { get; set; }
     public PromotionStatus Status { get; set; } = PromotionStatus.Draft;
+    public string DeliveryStatus { get; set; } = "queued";
+    public string? DeliveryError { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }

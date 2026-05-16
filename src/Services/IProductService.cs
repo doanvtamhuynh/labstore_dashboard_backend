@@ -11,7 +11,7 @@ public interface IProductService
     Task<ProductResponse> UpdateAsync(string id, ProductRequest request, CancellationToken cancellationToken);
     Task DeleteAsync(string id, CancellationToken cancellationToken);
     Task<ProductResponse> ChangeStatusAsync(string id, ProductStatusRequest request, CancellationToken cancellationToken);
-    Task<ProductResponse> AddImageAsync(string id, ProductImageRequest request, CancellationToken cancellationToken);
+    Task<ProductResponse> AddImageAsync(string id, ProductImageUploadRequest request, CancellationToken cancellationToken);
     Task DeleteImageAsync(string id, string imageId, CancellationToken cancellationToken);
     Task<ProductImportResult> ImportCsvAsync(IFormFile file, CancellationToken cancellationToken);
     Task<string> ExportCsvAsync(ProductQuery query, CancellationToken cancellationToken);

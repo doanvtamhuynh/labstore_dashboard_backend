@@ -1,6 +1,9 @@
 using backend.src.DTOs;
 using backend.src.Models;
 using backend.src.Repositories;
+using backend.src.Config;
+using Microsoft.Extensions.Options;
+
 namespace backend.src.Services;
 
 public sealed class PromotionService : IPromotionService
@@ -10,19 +13,25 @@ public sealed class PromotionService : IPromotionService
     private readonly ICrudRepository<PromoBanner> _banners;
     private readonly ICrudRepository<AffiliateProgram> _affiliates;
     private readonly ICrudRepository<EmailCampaign> _emailCampaigns;
+    private readonly IEmailService _emailService;
+    private readonly SmtpOptions _smtpOptions;
 
     public PromotionService(
         ICrudRepository<Coupon> coupons,
         ICrudRepository<FlashSale> flashSales,
         ICrudRepository<PromoBanner> banners,
         ICrudRepository<AffiliateProgram> affiliates,
-        ICrudRepository<EmailCampaign> emailCampaigns)
+        ICrudRepository<EmailCampaign> emailCampaigns,
+        IEmailService emailService,
+        IOptions<SmtpOptions> smtpOptions)
     {
         _coupons = coupons;
         _flashSales = flashSales;
         _banners = banners;
         _affiliates = affiliates;
         _emailCampaigns = emailCampaigns;
+        _emailService = emailService;
+        _smtpOptions = smtpOptions.Value;
     }
 
     public async Task<IReadOnlyList<CouponResponse>> ListCouponsAsync(CancellationToken cancellationToken)
@@ -150,10 +159,24 @@ public sealed class PromotionService : IPromotionService
             Body = request.Body,
             Segment = request.Segment.Trim(),
             ScheduledAtUtc = request.ScheduledAtUtc,
-            Status = PromotionStatus.Draft
+            Status = request.ScheduledAtUtc is null || request.ScheduledAtUtc <= DateTime.UtcNow ? PromotionStatus.Active : PromotionStatus.Draft
         };
+
+        var recipients = ResolveRecipients(item.Segment);
+        if (item.Status == PromotionStatus.Active)
+        {
+            var result = await _emailService.SendAsync(item.Subject, item.Body, recipients, cancellationToken);
+            item.DeliveryStatus = result.Status;
+            item.DeliveryError = result.Error;
+            item.Status = result.Sent ? PromotionStatus.Active : PromotionStatus.Paused;
+        }
+        else
+        {
+            item.DeliveryStatus = "scheduled";
+        }
+
         await _emailCampaigns.CreateAsync(item, cancellationToken);
-        return new EmailCampaignResponse(item.Id!, item.Subject, item.Segment, item.ScheduledAtUtc, item.Status);
+        return ToResponse(item);
     }
 
     private static async Task<T> RequireAsync<T>(ICrudRepository<T> repository, string id, CancellationToken cancellationToken) where T : class
@@ -165,4 +188,16 @@ public sealed class PromotionService : IPromotionService
     private static FlashSaleResponse ToResponse(FlashSale item) => new(item.Id!, item.Name, item.CategoryId, item.DiscountPercent, item.Status, item.StartsAtUtc, item.EndsAtUtc);
     private static PromoBannerResponse ToResponse(PromoBanner item) => new(item.Id!, item.Title, item.ImageUrl, item.LinkUrl, item.Position, item.Status, item.StartsAtUtc, item.EndsAtUtc);
     private static AffiliateProgramResponse ToResponse(AffiliateProgram item) => new(item.Id!, item.PartnerName, item.TrackingCode, item.CommissionPercent, item.Status);
+    private static EmailCampaignResponse ToResponse(EmailCampaign item) => new(item.Id!, item.Subject, item.Segment, item.ScheduledAtUtc, item.Status, item.DeliveryStatus, item.DeliveryError);
+
+    private IReadOnlyList<string> ResolveRecipients(string segment)
+    {
+        var direct = SmtpEmailService.SplitRecipients(segment);
+        if (direct.Any(item => item.Contains('@')))
+        {
+            return direct;
+        }
+
+        return SmtpEmailService.SplitRecipients(_smtpOptions.DefaultRecipients);
+    }
 }

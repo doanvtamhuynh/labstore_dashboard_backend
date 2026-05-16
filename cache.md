@@ -66,7 +66,7 @@
   - Product create/update supports variants, image URL records, inventory, price, and SEO metadata.
   - Import expects CSV columns: name, sku, price, stock, categoryId.
   - Export returns text/csv.
-  - Cloudinary upload is not wired yet; image endpoint stores URL metadata for now.
+  - Product image endpoint accepts multipart file upload or URL metadata; Cloudinary is used when CLOUDINARY_* env keys are set, otherwise files are stored under wwwroot/uploads.
 
 ## Categories
 - Endpoints:
@@ -103,7 +103,7 @@
 - Notes:
   - Order list supports status, date range, customer/code search, and pagination.
   - Status updates append an OrderHistoryEntry with the current admin identity.
-  - Invoice endpoint returns a simple valid application/pdf payload.
+  - Invoice endpoint returns a valid application/pdf payload with customer, shipping, item, and total lines.
   - Export returns text/csv.
 
 ## Customers
@@ -145,7 +145,7 @@
   - Flash sales support category targeting, discount percent, status, and schedule.
   - Banners support image URL, link URL, position, status, and schedule.
   - Affiliate programs support partner name, tracking code, commission percent, and status.
-  - Email campaign endpoint stores draft campaign data in MongoDB; email provider send integration is not wired yet.
+  - Email campaign endpoint sends immediately through SMTP when configured, schedules future campaigns, and persists delivery status/error in MongoDB.
 
 ## Payments
 - Endpoints:
@@ -233,7 +233,7 @@
 - Notes:
   - Notifications support Admin/Customer audience and optional recipient id.
   - Push endpoint stores notification and broadcasts notificationReceived via SignalR.
-  - Email trigger automation is not wired yet.
+  - Order status updates trigger customer email delivery through the shared SMTP service when SMTP is configured.
 
 ## Reports & Export
 - Endpoints:
@@ -250,7 +250,7 @@
   - src/DTOs/ReportDtos.cs
 - Notes:
   - Revenue supports optional FromDate/ToDate query.
-  - Export returns CSV data for revenue, products, inventory, customers, and affiliate reports.
+  - Export returns CSV by default and PDF when format=pdf for revenue, products, inventory, customers, and affiliate reports.
 
 ## SEO & Content
 - Endpoints:
@@ -284,4 +284,4 @@
 - Notes:
   - Admin create hashes password with BCrypt.
   - Audit log returns latest 200 entries.
-  - Backup endpoint returns queued placeholder response.
+  - Backup endpoint writes a ZIP archive with one JSONL file per MongoDB collection and returns path, size, and completed status.

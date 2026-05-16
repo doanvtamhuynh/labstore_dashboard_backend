@@ -10,10 +10,12 @@ namespace backend.src.Services;
 public sealed class OrderService : IOrderService
 {
     private readonly IOrderRepository _orders;
+    private readonly IEmailService _emailService;
 
-    public OrderService(IOrderRepository orders)
+    public OrderService(IOrderRepository orders, IEmailService emailService)
     {
         _orders = orders;
+        _emailService = emailService;
     }
 
     public async Task<(IReadOnlyList<OrderResponse> Items, PaginationMetadata Pagination)> ListAsync(OrderQuery query, CancellationToken cancellationToken)
@@ -46,6 +48,11 @@ public sealed class OrderService : IOrderService
         });
         order.Status = request.Status;
         await _orders.UpdateAsync(order, cancellationToken);
+        _ = await _emailService.SendAsync(
+            $"Order {order.Code} status updated",
+            $"<p>Your order <strong>{order.Code}</strong> status is now <strong>{order.Status}</strong>.</p><p>{request.Note}</p>",
+            [order.CustomerEmail],
+            cancellationToken);
         return ToResponse(order);
     }
 
@@ -58,14 +65,21 @@ public sealed class OrderService : IOrderService
     public async Task<byte[]> CreateInvoicePdfAsync(string id, CancellationToken cancellationToken)
     {
         var order = await GetOrderAsync(id, cancellationToken);
-        var lines = new[]
+        var lines = new List<string>
         {
             "Labstore Invoice",
             $"Invoice: {order.Code}",
             $"Customer: {order.CustomerName} <{order.CustomerEmail}>",
             $"Status: {order.Status}",
-            $"Total: {order.TotalAmount.ToString(CultureInfo.InvariantCulture)}"
+            $"Payment: {order.PaymentMethod} / {order.PaymentStatus}",
+            $"Ship to: {order.ShippingAddress.Line1}, {order.ShippingAddress.District}, {order.ShippingAddress.Province}",
+            "Items:"
         };
+        lines.AddRange(order.Items.Select(item => $"- {item.ProductName} x{item.Quantity} @ {item.Price.ToString(CultureInfo.InvariantCulture)} = {(item.Price * item.Quantity).ToString(CultureInfo.InvariantCulture)}"));
+        lines.Add($"Subtotal: {order.Subtotal.ToString(CultureInfo.InvariantCulture)}");
+        lines.Add($"Shipping: {order.ShippingFee.ToString(CultureInfo.InvariantCulture)}");
+        lines.Add($"Discount: {order.Discount.ToString(CultureInfo.InvariantCulture)}");
+        lines.Add($"Total: {order.TotalAmount.ToString(CultureInfo.InvariantCulture)}");
         return BuildSimplePdf(lines);
     }
 

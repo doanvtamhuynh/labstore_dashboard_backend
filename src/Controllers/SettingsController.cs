@@ -37,5 +37,5 @@ public sealed class SettingsController : ControllerBase
     [HttpGet("audit-log")]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<AuditLogResponse>>>> AuditLog(CancellationToken cancellationToken) => Ok(ApiResponse<IReadOnlyList<AuditLogResponse>>.Ok(await _settingsService.ListAuditLogsAsync(cancellationToken)));
     [HttpPost("backup")]
-    public async Task<ActionResult<ApiResponse<BackupResponse>>> Backup(CancellationToken cancellationToken) => Ok(ApiResponse<BackupResponse>.Ok(await _settingsService.BackupAsync(cancellationToken), "Backup queued"));
+    public async Task<ActionResult<ApiResponse<BackupResponse>>> Backup(CancellationToken cancellationToken) => Ok(ApiResponse<BackupResponse>.Ok(await _settingsService.BackupAsync(cancellationToken), "Backup completed"));
 }

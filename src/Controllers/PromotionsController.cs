@@ -83,5 +83,5 @@ public sealed class PromotionsController : ControllerBase
     }
 
     [HttpPost("email-campaigns")]
-    public async Task<ActionResult<ApiResponse<EmailCampaignResponse>>> CreateEmailCampaign(EmailCampaignRequest request, CancellationToken cancellationToken) => Ok(ApiResponse<EmailCampaignResponse>.Ok(await _promotionService.CreateEmailCampaignAsync(request, cancellationToken), "Email campaign queued"));
+    public async Task<ActionResult<ApiResponse<EmailCampaignResponse>>> CreateEmailCampaign(EmailCampaignRequest request, CancellationToken cancellationToken) => Ok(ApiResponse<EmailCampaignResponse>.Ok(await _promotionService.CreateEmailCampaignAsync(request, cancellationToken), "Email campaign processed"));
 }
