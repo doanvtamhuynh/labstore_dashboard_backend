@@ -105,3 +105,24 @@
   - Status updates append an OrderHistoryEntry with the current admin identity.
   - Invoice endpoint returns an application/pdf placeholder payload for now.
   - Export returns text/csv.
+
+## Customers
+- Endpoints:
+  - GET /api/customers
+  - GET /api/customers/{id}
+  - PATCH /api/customers/{id}/status
+  - PUT /api/customers/{id}/segment
+  - POST /api/customers/{id}/notes
+  - PUT /api/customers/{id}/loyalty
+- Main files:
+  - src/Controllers/CustomersController.cs
+  - src/Services/CustomerService.cs
+  - src/Repositories/CustomerRepository.cs
+  - src/Repositories/CustomerOrderRepository.cs
+  - src/Models/Customer.cs
+  - src/DTOs/CustomerDtos.cs
+- Notes:
+  - Customer list supports search, segment/status filter, and pagination.
+  - Detail response includes the latest 50 orders for purchase history.
+  - CRM notes store content, creator identity, and timestamp.
+  - Loyalty endpoint sets the current loyalty point balance.
