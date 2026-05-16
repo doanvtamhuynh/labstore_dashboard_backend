@@ -42,3 +42,28 @@
   - Reads generic MongoDB documents from orders, products, and customers collections.
   - Revenue chart groups orders by createdAtUtc; low stock count uses products.stock <= 10.
   - KPI returns conversionRate and averageOrderValue.
+
+## Products
+- Endpoints:
+  - GET /api/products
+  - GET /api/products/{id}
+  - POST /api/products
+  - PUT /api/products/{id}
+  - DELETE /api/products/{id}
+  - PATCH /api/products/{id}/status
+  - POST /api/products/{id}/images
+  - DELETE /api/products/{id}/images/{imageId}
+  - POST /api/products/import
+  - GET /api/products/export
+- Main files:
+  - src/Controllers/ProductsController.cs
+  - src/Services/ProductService.cs
+  - src/Repositories/ProductRepository.cs
+  - src/Models/Product.cs
+  - src/DTOs/ProductDtos.cs
+- Notes:
+  - Product list supports search, category/status filter, sort, and pagination.
+  - Product create/update supports variants, image URL records, inventory, price, and SEO metadata.
+  - Import expects CSV columns: name, sku, price, stock, categoryId.
+  - Export returns text/csv.
+  - Cloudinary upload is not wired yet; image endpoint stores URL metadata for now.
