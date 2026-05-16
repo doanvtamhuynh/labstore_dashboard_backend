@@ -56,6 +56,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerOrderRepository, CustomerOrderRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<ICrudRepository<Coupon>>(sp => new MongoCrudRepository<Coupon>(sp.GetRequiredService<IMongoDatabase>(), "promotion_coupons"));
 builder.Services.AddScoped<ICrudRepository<FlashSale>>(sp => new MongoCrudRepository<FlashSale>(sp.GetRequiredService<IMongoDatabase>(), "promotion_flash_sales"));
 builder.Services.AddScoped<ICrudRepository<PromoBanner>>(sp => new MongoCrudRepository<PromoBanner>(sp.GetRequiredService<IMongoDatabase>(), "promotion_banners"));
@@ -73,6 +74,7 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IShippingService, ShippingService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -181,3 +181,21 @@
   - Providers read from shipping_providers and fall back to default GHN/GHTK/Viettel Post entries when empty.
   - Tracking currently reflects order status by orderId.
   - Warehouses and shipping returns use Mongo CRUD repository.
+
+## Reviews & Comments
+- Endpoints:
+  - GET /api/reviews
+  - PATCH /api/reviews/{id}/status
+  - POST /api/reviews/{id}/reply
+  - GET /api/reviews/flagged
+- Main files:
+  - src/Controllers/ReviewsController.cs
+  - src/Services/ReviewService.cs
+  - src/Repositories/ReviewRepository.cs
+  - src/Models/Review.cs
+  - src/DTOs/ReviewDtos.cs
+- Notes:
+  - Review list supports rating, product, status filters, and pagination.
+  - Status supports Pending, Approved, Hidden, Deleted.
+  - Reply stores admin identity and reply timestamp.
+  - Flagged endpoint returns all reviews marked IsFlagged.
