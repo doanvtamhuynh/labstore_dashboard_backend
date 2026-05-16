@@ -209,7 +209,6 @@ FakesAssemblies/
 # JetBrains Rider
 *.sln.iml
 
-cache.md
 prompt.md
 .env
 AGENTS.md
