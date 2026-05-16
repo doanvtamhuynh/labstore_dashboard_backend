@@ -234,3 +234,54 @@
   - Notifications support Admin/Customer audience and optional recipient id.
   - Push endpoint stores notification and broadcasts notificationReceived via SignalR.
   - Email trigger automation is not wired yet.
+
+## Reports & Export
+- Endpoints:
+  - GET /api/reports/revenue
+  - GET /api/reports/products
+  - GET /api/reports/inventory
+  - GET /api/reports/customers
+  - GET /api/reports/affiliate
+  - GET /api/reports/{reportName}/export
+- Main files:
+  - src/Controllers/ReportsController.cs
+  - src/Services/ReportService.cs
+  - src/Repositories/ReportRepository.cs
+  - src/DTOs/ReportDtos.cs
+- Notes:
+  - Revenue supports optional FromDate/ToDate query.
+  - Export returns CSV placeholder with report name and generated timestamp.
+
+## SEO & Content
+- Endpoints:
+  - CRUD /api/seo/meta
+  - GET /api/seo/sitemap
+  - CRUD /api/blog/posts
+  - CRUD /api/pages
+  - CRUD /api/seo/redirects
+- Main files:
+  - src/Controllers/ContentController.cs
+  - src/Services/ContentService.cs
+  - src/Models/ContentModels.cs
+  - src/DTOs/ContentDtos.cs
+- Notes:
+  - Sitemap builds XML from published pages and blog posts.
+  - Blog posts and static pages support Draft/Published/Archived status.
+
+## Settings
+- Endpoints:
+  - GET/PUT /api/settings/store
+  - GET/PUT /api/settings/general
+  - CRUD /api/settings/admins
+  - GET /api/settings/audit-log
+  - POST /api/settings/backup
+- Main files:
+  - src/Controllers/SettingsController.cs
+  - src/Services/SettingsService.cs
+  - src/Repositories/SettingsRepository.cs
+  - src/Models/SettingsModels.cs
+  - src/DTOs/SettingsDtos.cs
+- Notes:
+  - Admin create hashes password with BCrypt.
+  - Audit log returns latest 200 entries.
+  - Backup endpoint returns queued placeholder response.

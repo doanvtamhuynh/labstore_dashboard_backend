@@ -1,0 +1,12 @@
+using backend.src.DTOs;
+
+namespace backend.src.Repositories;
+
+public interface IReportRepository
+{
+    Task<RevenueReportResponse> GetRevenueAsync(DateRangeQuery query, CancellationToken cancellationToken);
+    Task<IReadOnlyList<TopProductResponse>> GetProductsAsync(CancellationToken cancellationToken);
+    Task<InventoryReportResponse> GetInventoryAsync(CancellationToken cancellationToken);
+    Task<CustomerBehaviorReportResponse> GetCustomersAsync(CancellationToken cancellationToken);
+    Task<AffiliateReportResponse> GetAffiliateAsync(CancellationToken cancellationToken);
+}
