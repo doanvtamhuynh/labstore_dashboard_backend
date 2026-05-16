@@ -146,3 +146,20 @@
   - Banners support image URL, link URL, position, status, and schedule.
   - Affiliate programs support partner name, tracking code, commission percent, and status.
   - Email campaign endpoint returns a queued placeholder response; email provider is not wired yet.
+
+## Payments
+- Endpoints:
+  - GET /api/payments
+  - GET /api/payments/{id}
+  - POST /api/payments/{id}/refund
+  - GET /api/payments/reconciliation
+- Main files:
+  - src/Controllers/PaymentsController.cs
+  - src/Services/PaymentService.cs
+  - src/Repositories/PaymentRepository.cs
+  - src/Models/Payment.cs
+  - src/DTOs/PaymentDtos.cs
+- Notes:
+  - Payment list supports method/status/date filters and pagination.
+  - Refund validates remaining refundable amount and marks fully refunded transactions.
+  - Reconciliation returns gross revenue, refunded amount, net revenue, and transaction count.
