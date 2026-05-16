@@ -24,6 +24,7 @@
   - JWT Bearer auth, refresh-token rotation, BCrypt password hashing, TOTP 2FA, role policies, audit log writes are in place.
   - Swagger UI available at /swagger and OpenAPI JSON at /swagger/v1/swagger.json.
   - First login seeds a SuperAdmin from SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD when admin_users is empty.
+  - CORS allows localhost and 127.0.0.1 frontend dev origins on ports 5173 and 3000.
 
 ## Dashboard & Analytics
 - Endpoints:
